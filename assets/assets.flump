@@ -1,0 +1,23 @@
+{
+  "importDir": "",
+  "fileVersion": 2,
+  "exports": [
+    {
+      "scaleFactors": [
+        1
+      ],
+      "scale": 1,
+      "combine": false,
+      "optimize": "Speed",
+      "maxAtlasSize": 1024,
+      "textureBorder": 1,
+      "quality": "best",
+      "name": "assets",
+      "prettyPrint": false,
+      "format": "JSON",
+      "scaleFactorsString": "1",
+      "description": "'assets' (JSON, 100%, @1x)"
+    }
+  ],
+  "exportDir": "../bin"
+}
