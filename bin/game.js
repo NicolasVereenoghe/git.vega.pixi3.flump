@@ -409,7 +409,7 @@ vega_shell_ApplicationMatchSize.prototype = $extend(pixi_plugins_app_Application
 var Main = function() {
 	vega_shell_ApplicationMatchSize.call(this);
 	this.loader = new PIXI.loaders.Loader();
-	this.loader.add("","assets/assetsTest/library.json?v=1");
+	this.loader.add("","assets/assetsTest/library.json?v=2");
 	this.loader.after(pixi_flump_Parser.parse(1));
 	this.loader.load($bind(this,this.onLoadComplete));
 };
@@ -2013,22 +2013,35 @@ pixi_flump_Movie.prototype = $extend(PIXI.Container.prototype,{
 	}
 	,renderFrame: function(keyframe,x,y,scaleX,scaleY,skewX,skewY,alpha,tintMultiplier,tintColor) {
 		var layer = this.layers.h[keyframe.layer.__id__];
-		var lChild;
-		layer.pivot.x = keyframe.pivot.x;
-		layer.pivot.y = keyframe.pivot.y;
-		if(js_Boot.__instanceof(keyframe.symbol,flump_library_SpriteSymbol)) {
-			var spriteSymbol = keyframe.symbol;
-			layer.pivot.x -= spriteSymbol.origin.x;
-			layer.pivot.y -= spriteSymbol.origin.y;
-		}
+		var lChild = null;
+		var spriteSymbol = null;
 		layer.x = x;
 		layer.y = y;
 		if(layer.children.length > 0) {
 			lChild = layer.getChildAt(0);
 			lChild.scale.x = scaleX;
 			lChild.scale.y = scaleY;
-			lChild.x = -2 * scaleX * layer.pivot.x;
-			lChild.y = -2 * scaleY * layer.pivot.y;
+		}
+		if(layer.name != "flipbook") {
+			if(js_Boot.__instanceof(keyframe.symbol,flump_library_SpriteSymbol)) {
+				spriteSymbol = keyframe.symbol;
+				layer.pivot.x = 0;
+				layer.pivot.y = 0;
+				if(lChild != null) {
+					lChild.pivot.x = keyframe.pivot.x - spriteSymbol.origin.x;
+					lChild.pivot.y = keyframe.pivot.y - spriteSymbol.origin.y;
+				}
+			} else if(lChild != null && js_Boot.__instanceof(lChild,PIXI.Container) && (js_Boot.__cast(lChild , PIXI.Container)).children.length > 0 && (js_Boot.__cast(lChild , PIXI.Container)).getChildAt(0).name == "flipbook") {
+				lChild.pivot.x = keyframe.pivot.x;
+				lChild.pivot.y = keyframe.pivot.y;
+			} else {
+				layer.pivot.x = keyframe.pivot.x;
+				layer.pivot.y = keyframe.pivot.y;
+				if(lChild != null) {
+					lChild.x = (1 - scaleX) * layer.pivot.x;
+					lChild.y = (1 - scaleY) * layer.pivot.y;
+				}
+			}
 		}
 		layer.skew.x = skewX;
 		layer.skew.y = skewY;
