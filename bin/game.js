@@ -409,7 +409,7 @@ vega_shell_ApplicationMatchSize.prototype = $extend(pixi_plugins_app_Application
 var Main = function() {
 	vega_shell_ApplicationMatchSize.call(this);
 	this.loader = new PIXI.loaders.Loader();
-	this.loader.add("","assets/assetsTest/library.json?v=2");
+	this.loader.add("","assets/assetsTest/library.json?v=3");
 	this.loader.after(pixi_flump_Parser.parse(1));
 	this.loader.load($bind(this,this.onLoadComplete));
 };
@@ -2025,8 +2025,6 @@ pixi_flump_Movie.prototype = $extend(PIXI.Container.prototype,{
 		if(layer.name != "flipbook") {
 			if(js_Boot.__instanceof(keyframe.symbol,flump_library_SpriteSymbol)) {
 				spriteSymbol = keyframe.symbol;
-				layer.pivot.x = 0;
-				layer.pivot.y = 0;
 				if(lChild != null) {
 					lChild.pivot.x = keyframe.pivot.x - spriteSymbol.origin.x;
 					lChild.pivot.y = keyframe.pivot.y - spriteSymbol.origin.y;
@@ -2034,13 +2032,9 @@ pixi_flump_Movie.prototype = $extend(PIXI.Container.prototype,{
 			} else if(lChild != null && js_Boot.__instanceof(lChild,PIXI.Container) && (js_Boot.__cast(lChild , PIXI.Container)).children.length > 0 && (js_Boot.__cast(lChild , PIXI.Container)).getChildAt(0).name == "flipbook") {
 				lChild.pivot.x = keyframe.pivot.x;
 				lChild.pivot.y = keyframe.pivot.y;
-			} else {
-				layer.pivot.x = keyframe.pivot.x;
-				layer.pivot.y = keyframe.pivot.y;
-				if(lChild != null) {
-					lChild.x = (1 - scaleX) * layer.pivot.x;
-					lChild.y = (1 - scaleY) * layer.pivot.y;
-				}
+			} else if(lChild != null) {
+				lChild.x = -scaleX * keyframe.pivot.x;
+				lChild.y = -scaleY * keyframe.pivot.y;
 			}
 		}
 		layer.skew.x = skewX;

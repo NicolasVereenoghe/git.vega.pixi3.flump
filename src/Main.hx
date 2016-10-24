@@ -19,7 +19,7 @@ class Main extends ApplicationMatchSize {
 		super();
 		
 		loader	= new Loader();
-		loader.add( "", "assets/assetsTest/library.json?v=2");
+		loader.add( "", "assets/assetsTest/library.json?v=3");
 		loader.after( Parser.parse( 1));
 		loader.load( onLoadComplete);
 		
