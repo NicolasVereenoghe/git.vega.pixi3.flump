@@ -14,8 +14,6 @@ import vega.utils.UtilsFlump;
  * @author nico
  */
 class MyScreenInitLoad extends MyScreenLoad {
-	var cloneBar						: Container							= null;
-	
 	public function new() {
 		super();
 		
@@ -26,13 +24,7 @@ class MyScreenInitLoad extends MyScreenLoad {
 	}
 	
 	override public function destroy() : Void {
-		UtilsFlump.unsetCloneLayers( cast asset.getContent());
-		cloneBar = null;
-		
 		LocalMgr.instance.freeLocalTxtInMovie( cast asset.getContent());
-		
-		// pixiv4
-		//cast( asset.getContent(), Movie).getLayer( "barFront").getChildAt( 0).cacheAsBitmap = null;
 		
 		super.destroy();
 	}
@@ -50,12 +42,7 @@ class MyScreenInitLoad extends MyScreenLoad {
 	override function buildContent() : Void {
 		super.buildContent();
 		
-		cloneBar = UtilsFlump.setCloneLayer( cast asset.getContent(), "barFront");
-		
 		LocalMgr.instance.parseAndSetLocalTxtInMovie( cast asset.getContent());
-		
-		// pixiv4
-		//cast( asset.getContent(), Movie).getLayer( "barFront").getChildAt( 0).cacheAsBitmap = true;
 		
 		refreshBar();
 	}
@@ -69,7 +56,6 @@ class MyScreenInitLoad extends MyScreenLoad {
 	}
 	
 	function refreshBar() : Void {
-		//cast( asset.getContent(), Movie).getLayer( "barFront").getChildAt( 0).scale.x = Math.max( .005, curRate);
-		cloneBar.getChildAt( 0).scale.x = Math.max( .005, curRate);
+		cast( asset.getContent(), Movie).getLayer( "barFront").getChildAt( 0).scale.x = Math.max( .005, curRate);
 	}
 }

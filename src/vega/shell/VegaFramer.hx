@@ -68,10 +68,10 @@ class VegaFramer {
 	function doFrame( pTime : Float) : Void {
 		var lTime		: Float;
 		var lIterator	: Float -> Void;
+		var lClone		: Array<Float -> Void>;
 		var lDT			: Float;
 		var lInter		: Float;
 		var lAjust		: Float;
-		var lI			: Int;
 		
 		if ( isPause) hasRequest = false;
 		else{
@@ -85,8 +85,8 @@ class VegaFramer {
 				lAjust = Math.min( lDT - lInter, lInter / 2);
 				lDT -= lAjust;
 				
-				lI = iterators.length - 1;
-				while ( lI >= 0 && ! isPause) iterators[ lI--]( lDT);
+				lClone = iterators.copy();
+				for ( lIterator in lClone) if ( ( ! isPause) && iterators.indexOf( lIterator) != -1) lIterator( lDT);
 				
 				lastTime = lTime - lAjust;
 			}

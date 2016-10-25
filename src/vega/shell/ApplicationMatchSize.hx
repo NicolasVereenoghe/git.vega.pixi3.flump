@@ -10,7 +10,7 @@ import pixi.core.text.Text;
 import pixi.core.utils.Utils;
 import pixi.interaction.EventTarget;
 import pixi.plugins.app.Application;
-//import vega.utils.UtilsPixi;
+import vega.utils.UtilsPixi;
 
 /**
  * ...
@@ -117,7 +117,7 @@ class ApplicationMatchSize extends Application {
 				_debugSwitchBt.x	= _screenRect.x;
 				_debugSwitchBt.y	= _screenRect.y;
 				
-				//UtilsPixi.setQuickBt( _debugSwitchBt, onBtSwitchTrace);
+				UtilsPixi.setQuickBt( _debugSwitchBt, onBtSwitchTrace);
 				
 				_debugClsBt			= cast _container.addChild( new Container());
 				_debugClsBt.addChild( new Graphics());
@@ -127,7 +127,7 @@ class ApplicationMatchSize extends Application {
 				_debugClsBt.x		= _screenRect.x;
 				_debugClsBt.y		= _screenRect.y + _screenRect.height;
 				
-				//UtilsPixi.setQuickBt( _debugClsBt, onBtClsTrace);
+				UtilsPixi.setQuickBt( _debugClsBt, onBtClsTrace);
 			}
 			
 			lTxt = new Text(

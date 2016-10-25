@@ -1,43 +1,60 @@
 package;
 
-import js.Browser;
-import pixi.core.display.Container;
-import pixi.flump.Movie;
-import pixi.flump.Parser;
-import pixi.loaders.Loader;
-
+import labo.shell.MyShell;
+import vega.loader.file.MyFile;
 import vega.shell.ApplicationMatchSize;
+import vega.shell.BaseShell;
+import vega.shell.GlobalPointer;
+import vega.shell.VegaDeactivator;
+import vega.shell.VegaFramer;
+import vega.shell.VegaOrient;
+import vega.sound.SndMgr;
 
 /**
  * ...
  * @author nico
  */
 class Main extends ApplicationMatchSize {
-	var loader	: Loader;
+	var shell		: BaseShell;
 	
 	static function main() { new Main(); }
 	
 	public function new() {
 		super();
 		
-		loader	= new Loader();
-		loader.add( "", "assets/assetsTest/library.json?v=4");
-		loader.after( Parser.parse( 1));
-		loader.load( onLoadComplete);
+		//debugLvl = "INFO";
+		debug = true;
+		//debugMotifs = [ "VegaOrient"];
 		
+		setFPS( 60);
+		
+		version = "0";
+		
+		traceDebug( version, true);
+		
+		SndMgr.getInstance( .5);
+		
+		new GlobalPointer();
+		//GlobalPointer.instance.switchEnable( false);
+		
+		//VegaOrient.getInstance().init();
+		
+		VegaFramer.getInstance().addIterator( startShell);
+		
+		VegaDeactivator.getInstance();
 	}
 	
-	function onLoadComplete() : Void {
-		loader.removeAllListeners();
+	function startShell( pDT : Float) : Void {
+		VegaFramer.getInstance().remIterator( startShell);
 		
-		getContent().addChild( new Movie( "test"));
+		shell = new MyShell();
+		shell.init(
+			getContent(),
+			new MyFile( "assets.json", null, MyFile.VERSION_NO_CACHE),
+			new MyFile( "local.xml", null, MyFile.VERSION_NO_CACHE),
+			{ "Comfortaa-Light": new MyFile( "comfortaa_light.css", null, MyFile.NO_VERSION)}
+		);
 		
-		onUpdate = doUpdate;
-	}
-	
-	function doUpdate( pT : Float) : Void {
-		var lCont	: Container	= cast( getContent().getChildAt( 0), Movie).getLayer( "cube");
-		
-		lCont.y = 150 * Math.cos( Math.PI * 2 * pT / 1000) + 100;
+		//new Perf();
 	}
 }
