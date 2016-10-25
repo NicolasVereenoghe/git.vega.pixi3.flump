@@ -409,7 +409,7 @@ vega_shell_ApplicationMatchSize.prototype = $extend(pixi_plugins_app_Application
 var Main = function() {
 	vega_shell_ApplicationMatchSize.call(this);
 	this.loader = new PIXI.loaders.Loader();
-	this.loader.add("","assets/assetsTest/library.json?v=3");
+	this.loader.add("","assets/assetsTest/library.json?v=4");
 	this.loader.after(pixi_flump_Parser.parse(1));
 	this.loader.load($bind(this,this.onLoadComplete));
 };
@@ -422,6 +422,11 @@ Main.prototype = $extend(vega_shell_ApplicationMatchSize.prototype,{
 	onLoadComplete: function() {
 		this.loader.removeAllListeners();
 		this.getContent().addChild(new pixi_flump_Movie("test"));
+		this.onUpdate = $bind(this,this.doUpdate);
+	}
+	,doUpdate: function(pT) {
+		var lCont = (js_Boot.__cast(this.getContent().getChildAt(0) , pixi_flump_Movie)).getLayer("cube");
+		lCont.y = 150 * Math.cos(Math.PI * 2 * pT / 1000) + 100;
 	}
 	,__class__: Main
 });
@@ -731,6 +736,7 @@ var flump_MoviePlayer = function(symbol,movie,resolution) {
 	this.STATE_PLAYING = "playing";
 	this.independantControl = true;
 	this.independantTimeline = true;
+	this.prevPosition = -1;
 	this.advanced = 0.0;
 	this.previousElapsed = 0.0;
 	this.elapsed = 0.0;
@@ -771,6 +777,7 @@ flump_MoviePlayer.prototype = {
 	,reset: function() {
 		this.elapsed = 0;
 		this.previousElapsed = 0;
+		this.prevPosition = -1;
 	}
 	,get_position: function() {
 		return (this.elapsed % this.symbol.duration + this.symbol.duration) % this.symbol.duration;
@@ -890,6 +897,10 @@ flump_MoviePlayer.prototype = {
 		}
 	}
 	,render: function() {
+		var lIsUpdate = true;
+		var next = null;
+		var interped = -1;
+		var lColor = -1;
 		if(this.state == this.STATE_PLAYING) {
 			if(this.get_position() < 0) {
 				this.elapsed = 0;
@@ -901,7 +912,7 @@ flump_MoviePlayer.prototype = {
 				this.movie.onAnimationComplete();
 			}
 		}
-		while(this.get_position() < 0) this.position += this.symbol.duration;
+		if(this.get_position() != this.prevPosition && (this.prevPosition < 0 || _$UInt_UInt_$Impl_$.gt(this.get_totalFrames(),1))) this.prevPosition = this.get_position(); else lIsUpdate = false;
 		var _g = 0;
 		var _g1 = this.symbol.layers;
 		while(_g < _g1.length) {
@@ -909,25 +920,26 @@ flump_MoviePlayer.prototype = {
 			++_g;
 			var keyframe = layer.getKeyframeForTime(this.get_position());
 			if(keyframe.isEmpty == true) this.removeChildIfNessessary(keyframe); else if(keyframe.isEmpty == false) {
-				var interped = this.getInterpolation(keyframe,this.get_position());
-				var next = keyframe.next;
-				if(next.isEmpty) next = keyframe;
-				var lColor;
-				if(keyframe.tintColor != next.tintColor) {
-					var lPrevColor = keyframe.tintColor;
-					var lNextColor = next.tintColor;
-					var lPrevR = lPrevColor >> 16 & 255;
-					var lPrevG = lPrevColor >> 8 & 255;
-					var lPrevB = lPrevColor & 255;
-					var lNextR = lNextColor >> 16 & 255;
-					var lNextG = lNextColor >> 8 & 255;
-					var lNextB = lNextColor & 255;
-					lColor = Math.round(lPrevR + (lNextR - lPrevR) * interped) << 16 | Math.round(lPrevG + (lNextG - lPrevG) * interped) << 8 | Math.round(lPrevB + (lNextB - lPrevB) * interped);
-				} else lColor = keyframe.tintColor;
-				if(this.currentChildrenKey.h[layer.__id__] != keyframe.displayKey) {
-					this.createChildIfNessessary(keyframe);
-					this.removeChildIfNessessary(keyframe);
-					this.addChildIfNessessary(keyframe);
+				if(lIsUpdate) {
+					interped = this.getInterpolation(keyframe,this.get_position());
+					next = keyframe.next;
+					if(next.isEmpty) next = keyframe;
+					if(keyframe.tintColor != next.tintColor) {
+						var lPrevColor = keyframe.tintColor;
+						var lNextColor = next.tintColor;
+						var lPrevR = lPrevColor >> 16 & 255;
+						var lPrevG = lPrevColor >> 8 & 255;
+						var lPrevB = lPrevColor & 255;
+						var lNextR = lNextColor >> 16 & 255;
+						var lNextG = lNextColor >> 8 & 255;
+						var lNextB = lNextColor & 255;
+						lColor = Math.round(lPrevR + (lNextR - lPrevR) * interped) << 16 | Math.round(lPrevG + (lNextG - lPrevG) * interped) << 8 | Math.round(lPrevB + (lNextB - lPrevB) * interped);
+					} else lColor = keyframe.tintColor;
+					if(this.currentChildrenKey.h[layer.__id__] != keyframe.displayKey) {
+						this.createChildIfNessessary(keyframe);
+						this.removeChildIfNessessary(keyframe);
+						this.addChildIfNessessary(keyframe);
+					}
 				}
 				if(js_Boot.__instanceof(keyframe.symbol,flump_library_MovieSymbol)) {
 					var childMovie = this.movie.getChildPlayer(keyframe);
@@ -939,7 +951,7 @@ flump_MoviePlayer.prototype = {
 						childMovie.render();
 					}
 				}
-				this.movie.renderFrame(keyframe,keyframe.location.x + (next.location.x - keyframe.location.x) * interped,keyframe.location.y + (next.location.y - keyframe.location.y) * interped,keyframe.scale.x + (next.scale.x - keyframe.scale.x) * interped,keyframe.scale.y + (next.scale.y - keyframe.scale.y) * interped,keyframe.skew.x + (next.skew.x - keyframe.skew.x) * interped,keyframe.skew.y + (next.skew.y - keyframe.skew.y) * interped,keyframe.alpha + (next.alpha - keyframe.alpha) * interped,keyframe.tintMultiplier + (next.tintMultiplier - keyframe.tintMultiplier) * interped,lColor);
+				if(lIsUpdate) this.movie.renderFrame(keyframe,keyframe.location.x + (next.location.x - keyframe.location.x) * interped,keyframe.location.y + (next.location.y - keyframe.location.y) * interped,keyframe.scale.x + (next.scale.x - keyframe.scale.x) * interped,keyframe.scale.y + (next.scale.y - keyframe.scale.y) * interped,keyframe.skew.x + (next.skew.x - keyframe.skew.x) * interped,keyframe.skew.y + (next.skew.y - keyframe.skew.y) * interped,keyframe.alpha + (next.alpha - keyframe.alpha) * interped,keyframe.tintMultiplier + (next.tintMultiplier - keyframe.tintMultiplier) * interped,lColor);
 			}
 		}
 		this.advanced = 0;
@@ -2017,24 +2029,44 @@ pixi_flump_Movie.prototype = $extend(PIXI.Container.prototype,{
 		var spriteSymbol = null;
 		layer.x = x;
 		layer.y = y;
+		if(this.master) {
+			layer.x /= this.resolution;
+			layer.y /= this.resolution;
+		}
 		if(layer.children.length > 0) {
 			lChild = layer.getChildAt(0);
 			lChild.scale.x = scaleX;
 			lChild.scale.y = scaleY;
+			if(this.master) {
+				lChild.scale.x /= this.resolution;
+				lChild.scale.y /= this.resolution;
+			}
 		}
 		if(layer.name != "flipbook") {
 			if(js_Boot.__instanceof(keyframe.symbol,flump_library_SpriteSymbol)) {
-				spriteSymbol = keyframe.symbol;
 				if(lChild != null) {
+					spriteSymbol = keyframe.symbol;
 					lChild.pivot.x = keyframe.pivot.x - spriteSymbol.origin.x;
 					lChild.pivot.y = keyframe.pivot.y - spriteSymbol.origin.y;
+					if(this.master) {
+						lChild.pivot.x /= this.resolution;
+						lChild.pivot.y /= this.resolution;
+					}
 				}
 			} else if(lChild != null && js_Boot.__instanceof(lChild,PIXI.Container) && (js_Boot.__cast(lChild , PIXI.Container)).children.length > 0 && (js_Boot.__cast(lChild , PIXI.Container)).getChildAt(0).name == "flipbook") {
 				lChild.pivot.x = keyframe.pivot.x;
 				lChild.pivot.y = keyframe.pivot.y;
+				if(this.master) {
+					lChild.pivot.x /= this.resolution;
+					lChild.pivot.y /= this.resolution;
+				}
 			} else if(lChild != null) {
 				lChild.x = -scaleX * keyframe.pivot.x;
 				lChild.y = -scaleY * keyframe.pivot.y;
+				if(this.master) {
+					lChild.x /= this.resolution;
+					lChild.y /= this.resolution;
+				}
 			}
 		}
 		layer.skew.x = skewX;
@@ -2049,12 +2081,6 @@ pixi_flump_Movie.prototype = $extend(PIXI.Container.prototype,{
 			HxOverrides.remove(layer.filters,keyframe.layer.refAnimatedTint);
 			keyframe.layer.refAnimatedTint = null;
 		} else keyframe.layer.refAnimatedTint.update(tintColor,tintMultiplier);
-		if(this.master) {
-			layer.x /= this.resolution;
-			layer.y /= this.resolution;
-			layer.scale.x /= this.resolution;
-			layer.scale.y /= this.resolution;
-		}
 	}
 	,setMask: function(layer) {
 		if(layer.mask != null) {

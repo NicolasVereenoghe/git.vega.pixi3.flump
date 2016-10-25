@@ -1,5 +1,7 @@
 package;
 
+import js.Browser;
+import pixi.core.display.Container;
 import pixi.flump.Movie;
 import pixi.flump.Parser;
 import pixi.loaders.Loader;
@@ -19,7 +21,7 @@ class Main extends ApplicationMatchSize {
 		super();
 		
 		loader	= new Loader();
-		loader.add( "", "assets/assetsTest/library.json?v=3");
+		loader.add( "", "assets/assetsTest/library.json?v=4");
 		loader.after( Parser.parse( 1));
 		loader.load( onLoadComplete);
 		
@@ -29,5 +31,13 @@ class Main extends ApplicationMatchSize {
 		loader.removeAllListeners();
 		
 		getContent().addChild( new Movie( "test"));
+		
+		onUpdate = doUpdate;
+	}
+	
+	function doUpdate( pT : Float) : Void {
+		var lCont	: Container	= cast( getContent().getChildAt( 0), Movie).getLayer( "cube");
+		
+		lCont.y = 150 * Math.cos( Math.PI * 2 * pT / 1000) + 100;
 	}
 }
